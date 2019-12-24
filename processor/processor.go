@@ -66,7 +66,7 @@ type state struct {
 	flows         []flow.FlowMessage
 	offstash      *cluster.OffsetStash
 	consumer      *cluster.Consumer
-	producer      *sarama.AsyncProducer
+	producer      sarama.AsyncProducer
 	networks      map[string]string
 	OutKafkaTopic *string
 }
