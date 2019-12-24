@@ -94,4 +94,8 @@ message FlowMessage {
   string DstCountry = 101;
   uint32 SrcASDB = 102;
   uint32 DstASDB = 103;
+  
+  string SrcIpStr = 1001;
+  string DstIpStr = 1002;
+  
 }

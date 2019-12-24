@@ -131,9 +131,13 @@ type FlowMessage struct {
 	DstCountry           string   `protobuf:"bytes,101,opt,name=DstCountry,proto3" json:"DstCountry,omitempty"`
 	SrcASDB              uint32   `protobuf:"varint,102,opt,name=SrcASDB,proto3" json:"SrcASDB,omitempty"`
 	DstASDB              uint32   `protobuf:"varint,103,opt,name=DstASDB,proto3" json:"DstASDB,omitempty"`
+	SrcIpStr           string   `protobuf:"bytes,1001,opt,name=SrcIpStr,proto3" json:"SrcIpStr,omitempty"`
+	DstIpStr           string   `protobuf:"bytes,1002,opt,name=DstIpStr,proto3" json:"DstIpStr,omitempty"`
+
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
+
 }
 
 func (m *FlowMessage) Reset()         { *m = FlowMessage{} }
@@ -418,6 +422,21 @@ func (m *FlowMessage) GetIPv6FlowLabel() uint32 {
 	}
 	return 0
 }
+
+func (m *FlowMessage) GetSrcIpStr() string {
+	if m != nil {
+		return m.SrcIpStr
+	}
+	return ""
+}
+
+func (m *FlowMessage) GetDstIpStr() string {
+	if m != nil {
+		return m.DstIpStr
+	}
+	return ""
+}
+
 
 func (m *FlowMessage) GetSrcCountry() string {
 	if m != nil {

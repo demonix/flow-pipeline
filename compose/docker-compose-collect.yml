@@ -65,9 +65,17 @@ services:
     restart: always
     volumes:
       - ./postgres:/docker-entrypoint-initdb.d
+  processor:
+    build: ../processor
+    restart: always
+    command: >
+      /processor -kafka.input.brokers kafka:9092 -kafka.input.topic flows 
+      -kafka.output.brokers kafka:9092 -kafka.output.topic flows-processed
+
+
   inserter:
     build: ../inserter
     restart: always
     command: >
-      /inserter -kafka.brokers kafka:9092 -kafka.topic flows 
+      /inserter -kafka.brokers kafka:9092 -kafka.topic flows-processed
       -postgres.host postgres -postgres.port 5432 -postgres.pass flows
