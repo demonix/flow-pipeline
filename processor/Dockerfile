@@ -1,4 +1,4 @@
-ARG src_dir="/go/src/github.com/cloudflare/flow-pipeline/inserter"
+ARG src_dir="/go/src/github.com/cloudflare/flow-pipeline/processor"
 
 FROM golang:alpine as builder
 ARG src_dir
@@ -19,6 +19,6 @@ ARG src_dir
 RUN apk update --no-cache && \
     adduser -S -D -H -h / flow
 USER flow
-COPY --from=builder ${src_dir}/inserter /
+COPY --from=builder ${src_dir}/processor /
 
-ENTRYPOINT ["./inserter"]
+ENTRYPOINT ["./processor"]
