@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -64,27 +63,23 @@ type state struct {
 
 	db *sql.DB
 
-	flows    []flow.FlowMessage
-	offstash *cluster.OffsetStash
-	consumer *cluster.Consumer
-	producer *sarama.AsyncProducer
-	networks map[string]string
+	flows         []flow.FlowMessage
+	offstash      *cluster.OffsetStash
+	consumer      *cluster.Consumer
+	producer      *sarama.AsyncProducer
+	networks      map[string]string
+	OutKafkaTopic *string
 }
 
 func (s *state) flush() bool {
 	log.Infof("Processed %d records in the last iteration.", s.msgCount)
 	s.msgCount = 0
 
-	flows_replace := make([]string, len(flow_fields))
-	for i := range flow_fields {
-		flows_replace[i] = fmt.Sprintf("$%v", i+1)
-	}
-	query := fmt.Sprintf("INSERT INTO flows (%v) VALUES (%v)", strings.Join(flow_fields, ", "), strings.Join(flows_replace, ", "))
 	for _, curFlow := range s.flows {
 
 		b, _ := proto.Marshal(curFlow)
 
-		producer.Input() <- &sarama.ProducerMessage{
+		s.producer.Input() <- &sarama.ProducerMessage{
 			Topic: *KafkaTopic,
 			Value: sarama.ByteEncoder(b),
 		}
@@ -128,7 +123,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 	return false, nil, cur
 }
 
-func closeAll(db *sql.DB, consumer *cluster.Consumer, producer *sarama.Producer) {
+func closeAll(db *sql.DB, consumer *cluster.Consumer, producer *sarama.AsyncProducer) {
 	consumer.Close()
 	db.Close()
 	producer.Close()
@@ -145,6 +140,7 @@ func main() {
 		offstash: cluster.NewOffsetStash(),
 	}
 	s.networks = getNetWorks()
+	s.OutKafkaTopic = OutKafkaTopic
 	go s.metricsHTTP()
 
 	config := cluster.NewConfig()

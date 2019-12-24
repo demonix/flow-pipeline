@@ -36,7 +36,7 @@ func inc(ip net.IP) {
 	}
 }
 
-func getNetWorks(NetworksDict map[string]string) {
+func getNetWorks() (NetworksDict map[string]string) {
 	NetworksDict = make(map[string]string)
 	tmp, err := Hosts("192.168.1.1/24")
 	if err != nil {
