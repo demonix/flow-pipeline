@@ -11,8 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Shopify/sarama"
-
+	sarama "github.com/Shopify/sarama"
 	cluster "github.com/bsm/sarama-cluster"
 	flow "github.com/cloudflare/flow-pipeline/pb-ext"
 	proto "github.com/golang/protobuf/proto"
@@ -68,7 +67,7 @@ type state struct {
 	flows    []flow.FlowMessage
 	offstash *cluster.OffsetStash
 	consumer *cluster.Consumer
-	producer *sarama.Producer
+	producer *sarama.AsyncProducer
 	networks map[string]string
 }
 
