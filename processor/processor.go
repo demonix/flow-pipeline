@@ -12,7 +12,7 @@ import (
 
 	sarama "github.com/Shopify/sarama"
 	cluster "github.com/bsm/sarama-cluster"
-	flow "github.com/cloudflare/flow-pipeline/pb-ext"
+	flow "github.com/demonix/flow-pipeline/pb-ext"
 	proto "github.com/golang/protobuf/proto"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
@@ -77,10 +77,10 @@ func (s *state) flush() bool {
 
 	for _, curFlow := range s.flows {
 
-		b, _ := proto.Marshal(curFlow)
+		b, _ := proto.Marshal(&curFlow)
 
 		s.producer.Input() <- &sarama.ProducerMessage{
-			Topic: *KafkaTopic,
+			Topic: *s.OutKafkaTopic,
 			Value: sarama.ByteEncoder(b),
 		}
 	}
@@ -123,9 +123,8 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 	return false, nil, cur
 }
 
-func closeAll(db *sql.DB, consumer *cluster.Consumer, producer *sarama.AsyncProducer) {
+func closeAll(consumer *cluster.Consumer, producer sarama.AsyncProducer) {
 	consumer.Close()
-	db.Close()
 	producer.Close()
 }
 
@@ -146,7 +145,7 @@ func main() {
 	config := cluster.NewConfig()
 	inBrokers := strings.Split(*InKafkaBrk, ",")
 	inTopics := []string{*InKafkaTopic}
-	consumer, err := cluster.NewConsumer(inBrokers, *InKafkaGroup, topics, config)
+	consumer, err := cluster.NewConsumer(inBrokers, *InKafkaGroup, inTopics, config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,7 +171,7 @@ func main() {
 		}
 	}()
 
-	defer closeAll(db, consumer, producer)
+	defer closeAll(consumer, producer)
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)

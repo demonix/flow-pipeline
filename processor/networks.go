@@ -54,5 +54,5 @@ func getNetWorks() (NetworksDict map[string]string) {
 	for _, curFlow := range tmp {
 		NetworksDict[curFlow] = "SecondProject"
 	}
-
+	return NetworksDict
 }
