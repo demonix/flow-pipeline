@@ -47,7 +47,7 @@ func getNetWorks(NetworksDict map[string]string) {
 		NetworksDict[curFlow] = "FirstProject"
 	}
 
-	tmp, err := Hosts("192.168.1.2/24")
+	tmp, err = Hosts("192.168.1.2/24")
 	if err != nil {
 		log.Fatal(err)
 	}

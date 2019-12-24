@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+
 	cluster "github.com/bsm/sarama-cluster"
 	flow "github.com/cloudflare/flow-pipeline/pb-ext"
 	proto "github.com/golang/protobuf/proto"
@@ -31,9 +32,8 @@ var (
 	InKafkaBrk   = flag.String("kafka.input.brokers", "127.0.0.1:9092,[::1]:9092", "Kafka brokers list separated by commas")
 	InKafkaGroup = flag.String("kafka.input.group", "flows-processor", "Kafka group id")
 
-	OutKafkaTopic = flag.String("kafka.topic", "flows-processed", "Kafka topic to consume from")
-	OutKafkaBrk   = flag.String("kafka.brokers", "127.0.0.1:9092,[::1]:9092", "Kafka brokers list separated by commas")
-	
+	OutKafkaTopic = flag.String("kafka.output.topic", "flows-processed", "Kafka topic to consume from")
+	OutKafkaBrk   = flag.String("kafka.output.brokers", "127.0.0.1:9092,[::1]:9092", "Kafka brokers list separated by commas")
 
 	FlushTime  = flag.String("flush.dur", "5s", "Flush duration")
 	FlushCount = flag.Int("flush.count", 100, "Flush count")
@@ -151,18 +151,18 @@ func main() {
 	config := cluster.NewConfig()
 	inBrokers := strings.Split(*InKafkaBrk, ",")
 	inTopics := []string{*InKafkaTopic}
-	consumer, err := cluster.NewConsumer(brokers, *InKafkaGroup, topics, config)
+	consumer, err := cluster.NewConsumer(inBrokers, *InKafkaGroup, topics, config)
 	if err != nil {
 		log.Fatal(err)
 	}
 	s.consumer = consumer
 
-	brokers := strings.Split(*OutKafkaBrk, ",")
-	config := sarama.NewConfig()
-	config.Producer.Return.Errors = true
-	config.Producer.Return.Successes = false
-	producer, err := sarama.NewAsyncProducer(brokers, config)
-	log.Infof("Trying to connect to Kafka: %v", brokers)
+	outBrokers := strings.Split(*OutKafkaBrk, ",")
+	sarmaconfig := sarama.NewConfig()
+	sarmaconfig.Producer.Return.Errors = true
+	sarmaconfig.Producer.Return.Successes = false
+	producer, err := sarama.NewAsyncProducer(outBrokers, sarmaconfig)
+	log.Infof("Trying to connect to Kafka: %v", outBrokers)
 	if err != nil {
 		log.Fatal(err)
 	}
