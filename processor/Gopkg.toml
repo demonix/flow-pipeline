@@ -34,7 +34,7 @@
   version = "2.1.15"
 
 [[constraint]]
-  name = "github.com/cloudflare/flow-pipeline"
+  name = "github.com/demonix/flow-pipeline"
   version = "1.0.0"
 
 [[constraint]]
