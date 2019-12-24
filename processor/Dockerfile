@@ -1,4 +1,4 @@
-ARG src_dir="/go/src/github.com/cloudflare/flow-pipeline/processor"
+ARG src_dir="/go/src/github.com/demonix/flow-pipeline/processor"
 
 FROM golang:alpine as builder
 ARG src_dir
