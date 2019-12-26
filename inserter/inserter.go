@@ -361,7 +361,7 @@ func initNetworks() {
 		"10.81.20.0/24":    "Market",
 		"10.81.21.0/24":    "DEVOPS",
 	}
-
+	ProjectIPS["0.0.0.0"] = "AllNetworks"
 	for netCidr, prjName := range ProjectIPBlocks {
 		allHosts, err := Hosts(netCidr)
 		if err != nil {
@@ -406,6 +406,7 @@ func inc(ip net.IP) {
 }
 
 func main() {
+	initNetworks()
 	flag.Parse()
 
 	lvl, _ := log.ParseLevel(*LogLevel)
