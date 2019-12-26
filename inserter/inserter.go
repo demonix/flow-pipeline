@@ -176,10 +176,10 @@ func getPrj(ip string) (project string) {
 	return "PublicNetwork"
 }
 
-func parseProjectNet(netCidr string, projectName string) (net *net.IPNet, projName string) {
-	_, block, err := net.ParseCIDR(cidr)
+func parseProjectNet(netCidr string, projectName string) (networkBlock *net.IPNet, projName string) {
+	_, block, err := net.ParseCIDR(netCidr)
 	if err != nil {
-		panic(fmt.Errorf("parse error on %q: %v", cidr, err))
+		panic(fmt.Errorf("parse error on %q: %v", netCidr, err))
 	}
 	return block, projectName
 }
@@ -243,7 +243,6 @@ func initNetworks() {
 		"10.18.33.0/24":    "Travel",
 		"10.18.34.0/24":    "K84",
 		"10.20.1.0/24":     "Diadoc",
-		"10.80.0.0/24":     "XLT_DHCP_relay-src",
 		"10.81.8.0/24":     "XLT_Testing",
 		"192.168.120.0/24": "Test",
 		"192.168.127.0/24": "Admin-Svcs",
