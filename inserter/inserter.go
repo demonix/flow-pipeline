@@ -141,7 +141,8 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 			fmsg.SamplingRate,
 			srcipstr,
 			dstipstr,
-
+			srcprj,
+			dstprj,
 			fmsg.Bytes,
 			fmsg.Packets,
 			fmsg.SrcPort,
@@ -202,8 +203,6 @@ func initNetworks() {
 		}
 		PrivateIPBlocks = append(PrivateIPBlocks, block)
 	}
-	var net *net.IPNet
-	var projName string
 
 	ProjectIPBlocks = map[string]string{
 		"10.217.0.0/16":    "DevTest",
