@@ -12,7 +12,7 @@ import (
 
 	sarama "github.com/Shopify/sarama"
 	cluster "github.com/bsm/sarama-cluster"
-	flow "github.com/demonix/flow-pipeline/pb-ext"
+	flow "github.com/demonix/goflow/pb"
 	proto "github.com/golang/protobuf/proto"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
@@ -102,8 +102,25 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 	} else {
 		log.Debug(fmsg)
 
-		srcip := net.IP(fmsg.SrcIP)
-		dstip := net.IP(fmsg.DstIP)
+		srcip := net.IP(fmsg.SrcAddr)
+		dstip := net.IP(fmsg.DstAddr)
+		if fmsg.SrcPort == 0 {
+			if fmsg.UdpSrcPort != 0 {
+				fmsg.SrcPort = fmsg.UdpSrcPort
+			}
+			if fmsg.TcpSrcPort != 0 {
+				fmsg.SrcPort = fmsg.TcpSrcPort
+			}
+		}
+		if fmsg.DstPort == 0 {
+			if fmsg.UdpDstPort != 0 {
+				fmsg.DstPort = fmsg.UdpDstPort
+			}
+			if fmsg.TcpDstPort != 0 {
+				fmsg.DstPort = fmsg.TcpDstPort
+			}
+		}
+
 		srcipstr := srcip.String()
 		dstipstr := dstip.String()
 
