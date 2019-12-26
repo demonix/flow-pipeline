@@ -13,7 +13,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         dst_as bigint,
         src_ip inet,
         dst_ip inet,
-
+        src_prj varchar(100),
+        dst_prj varchar(100),
         bytes bigint,
         packets bigint,
 
