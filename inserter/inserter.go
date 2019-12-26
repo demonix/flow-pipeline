@@ -4,20 +4,21 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"os/signal"
+	"strings"
+	"time"
+
 	"github.com/Shopify/sarama"
 	cluster "github.com/bsm/sarama-cluster"
-	flow "github.com/cloudflare/flow-pipeline/pb-ext"
+	flow "github.com/demonix/goflow/pb"
 	proto "github.com/golang/protobuf/proto"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"os/signal"
-	"strings"
-	"net"
-	"time"
 )
 
 var (
@@ -116,8 +117,8 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 		log.Debug(fmsg)
 		ts := time.Unix(int64(fmsg.TimeFlow), 0)
 
-		srcip := net.IP(fmsg.SrcIP)
-		dstip := net.IP(fmsg.DstIP)
+		srcip := net.IP(fmsg.SrcAddr)
+		dstip := net.IP(fmsg.SrcAddr)
 		srcipstr := srcip.String()
 		dstipstr := dstip.String()
 		if srcipstr == "<nil>" {
