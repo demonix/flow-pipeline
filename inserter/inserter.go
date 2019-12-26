@@ -170,7 +170,7 @@ func getPrj(ip string) (project string) {
 		return prj
 	}
 	for _, network := range PrivateIPBlocks {
-		if network.Contains(net.ParseIP("192.168.1.1")) {
+		if network.Contains(net.ParseIP(ip)) {
 			return "InternalNetwork"
 		}
 	}
@@ -205,6 +205,8 @@ func initNetworks() {
 	}
 
 	ProjectIPBlocks = map[string]string{
+		"185.161.180.0/22": "OurExternalNetwork",
+		"46.17.200.0/21":   "OurExternalNetwork",
 		"10.217.0.0/16":    "DevTest",
 		"10.17.0.0/24":     "KEInfra",
 		"10.17.2.0/24":     "WIC",
