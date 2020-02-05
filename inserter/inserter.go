@@ -20,7 +20,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"github.com/zmap/go-iptree/iptree"
-	
 )
 
 var (
@@ -44,7 +43,7 @@ var (
 	ProjectIPBlocks map[string]string = make(map[string]string)
 	ProjectIPS      map[string]string = make(map[string]string)
 
-	NetTree *iptree.IPTree 
+	NetTree *iptree.IPTree
 
 	Inserts = prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -171,7 +170,7 @@ func closeAll(db *sql.DB, consumer *cluster.Consumer) {
 }
 
 func getPrj(ip string) (project string) {
-	proj, found _ := NetTree.GetByString(ip)
+	proj, found, _ := NetTree.GetByString(ip)
 
 	if found {
 		return proj
@@ -182,7 +181,7 @@ func getPrj(ip string) (project string) {
 func initNetworks() {
 
 	NetTree = iptree.New()
-	
+
 	NetTree.AddByString("0.0.0.0/0", "ExternalNetwork")
 	NetTree.AddByString("127.0.0.0/8", "Loopback")
 	NetTree.AddByString("10.0.0.0/8", "PrivateNet")
