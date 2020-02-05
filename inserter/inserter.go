@@ -19,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+	"github.com/thekvs/go-net-radix"
 )
 
 var (
@@ -41,6 +42,8 @@ var (
 	PrivateIPBlocks []*net.IPNet
 	ProjectIPBlocks map[string]string = make(map[string]string)
 	ProjectIPS      map[string]string = make(map[string]string)
+
+	NetTree *NetRadixTree
 
 	Inserts = prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -121,6 +124,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 	} else {
 		log.Debug(fmsg)
 		ts := time.Unix(int64(fmsg.TimeFlowEnd), 0)
+		//ts := time.Now.Truncate(time.Minute)
 
 		srcip := net.IP(fmsg.SrcAddr)
 		dstip := net.IP(fmsg.DstAddr)
@@ -134,6 +138,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 		}
 		srcprj := getPrj(srcipstr)
 		dstprj := getPrj(dstipstr)
+
 		extract := []interface{}{
 			"NOW()",
 			ts,
@@ -165,44 +170,30 @@ func closeAll(db *sql.DB, consumer *cluster.Consumer) {
 }
 
 func getPrj(ip string) (project string) {
-	prj, found := ProjectIPS[ip]
-	if found {
-		return prj
-	}
-	for _, network := range PrivateIPBlocks {
-		if network.Contains(net.ParseIP(ip)) {
-			return "InternalNetwork"
-		}
-	}
-	return "PublicNetwork"
-}
+	found, proj, err := NetTree.SearchBest(ip)
 
-func parseProjectNet(netCidr string, projectName string) (networkBlock *net.IPNet, projName string) {
-	_, block, err := net.ParseCIDR(netCidr)
-	if err != nil {
-		panic(fmt.Errorf("parse error on %q: %v", netCidr, err))
+	if found {
+		return proj
 	}
-	return block, projectName
+	return "UnknownNetwork"
 }
 
 func initNetworks() {
 
-	for _, cidr := range []string{
-		"127.0.0.0/8",    // IPv4 loopback
-		"10.0.0.0/8",     // RFC1918
-		"172.16.0.0/12",  // RFC1918
-		"192.168.0.0/16", // RFC1918
-		"169.254.0.0/16", // RFC3927 link-local
-		"::1/128",        // IPv6 loopback
-		"fe80::/10",      // IPv6 link-local
-		"fc00::/7",       // IPv6 unique local addr
-	} {
-		_, block, err := net.ParseCIDR(cidr)
-		if err != nil {
-			panic(fmt.Errorf("parse error on %q: %v", cidr, err))
-		}
-		PrivateIPBlocks = append(PrivateIPBlocks, block)
+	NetTree, err := netradix.NewNetRadixTree()
+	if err != nil {
+		panic(err)
 	}
+
+	NetTree.Add("0.0.0.0/0", "ExternalNetwork")
+	NetTree.Add("127.0.0.0/8", "Loopback")
+	NetTree.Add("10.0.0.0/8", "PrivateNet")
+	NetTree.Add("172.16.0.0/12", "PrivateNet")
+	NetTree.Add("192.168.0.0/16", "PrivateNet")
+	NetTree.Add("169.254.0.0/16", "LinkLocal")
+	NetTree.Add("::1/128", "Loopback")
+	NetTree.Add("fe80::/10", "LinkLocal")
+	NetTree.Add("fc00::/7", "IPv6Local")
 
 	ProjectIPBlocks = map[string]string{
 		"185.161.180.0/22": "OurExternalNetwork",
@@ -363,48 +354,12 @@ func initNetworks() {
 		"10.81.20.0/24":    "Market",
 		"10.81.21.0/24":    "DEVOPS",
 	}
-	ProjectIPS["0.0.0.0"] = "AllNetworks"
+
 	for netCidr, prjName := range ProjectIPBlocks {
-		allHosts, err := Hosts(netCidr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, host := range allHosts {
-			ProjectIPS[host] = prjName
-		}
+
+		NetTree.Add(netCidr, prjName)
 	}
 
-}
-
-func Hosts(cidr string) ([]string, error) {
-	ip, ipnet, err := net.ParseCIDR(cidr)
-	if err != nil {
-		return nil, err
-	}
-
-	var ips []string
-	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-		ips = append(ips, ip.String())
-	}
-
-	// remove network address and broadcast address
-	lenIPs := len(ips)
-	switch {
-	case lenIPs < 2:
-		return ips, nil
-
-	default:
-		return ips[1 : len(ips)-1], nil
-	}
-}
-
-func inc(ip net.IP) {
-	for j := len(ip) - 1; j >= 0; j-- {
-		ip[j]++
-		if ip[j] > 0 {
-			break
-		}
-	}
 }
 
 func main() {
