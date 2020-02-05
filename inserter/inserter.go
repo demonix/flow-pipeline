@@ -173,7 +173,7 @@ func getPrj(ip string) (project string) {
 	proj, found, _ := NetTree.GetByString(ip)
 
 	if found {
-		return proj
+		return proj.(string)
 	}
 	return "UnknownNetwork"
 }
