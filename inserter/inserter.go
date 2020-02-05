@@ -19,7 +19,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
-	"github.com/thekvs/go-net-radix"
+	"github.com/zmap/go-iptree"
+	
 )
 
 var (
@@ -43,7 +44,7 @@ var (
 	ProjectIPBlocks map[string]string = make(map[string]string)
 	ProjectIPS      map[string]string = make(map[string]string)
 
-	NetTree *netradix.NetRadixTree
+	NetTree *iptree.IPTree 
 
 	Inserts = prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -170,7 +171,7 @@ func closeAll(db *sql.DB, consumer *cluster.Consumer) {
 }
 
 func getPrj(ip string) (project string) {
-	found, proj, _ := NetTree.SearchBest(ip)
+	proj, found _ := NetTree.GetByString(ip)
 
 	if found {
 		return proj
@@ -180,20 +181,17 @@ func getPrj(ip string) (project string) {
 
 func initNetworks() {
 
-	NetTree, err := netradix.NewNetRadixTree()
-	if err != nil {
-		panic(err)
-	}
-
-	NetTree.Add("0.0.0.0/0", "ExternalNetwork")
-	NetTree.Add("127.0.0.0/8", "Loopback")
-	NetTree.Add("10.0.0.0/8", "PrivateNet")
-	NetTree.Add("172.16.0.0/12", "PrivateNet")
-	NetTree.Add("192.168.0.0/16", "PrivateNet")
-	NetTree.Add("169.254.0.0/16", "LinkLocal")
-	NetTree.Add("::1/128", "Loopback")
-	NetTree.Add("fe80::/10", "LinkLocal")
-	NetTree.Add("fc00::/7", "IPv6Local")
+	NetTree = iptree.New()
+	
+	NetTree.AddByString("0.0.0.0/0", "ExternalNetwork")
+	NetTree.AddByString("127.0.0.0/8", "Loopback")
+	NetTree.AddByString("10.0.0.0/8", "PrivateNet")
+	NetTree.AddByString("172.16.0.0/12", "PrivateNet")
+	NetTree.AddByString("192.168.0.0/16", "PrivateNet")
+	NetTree.AddByString("169.254.0.0/16", "LinkLocal")
+	NetTree.AddByString("::1/128", "Loopback")
+	NetTree.AddByString("fe80::/10", "LinkLocal")
+	NetTree.AddByString("fc00::/7", "IPv6Local")
 
 	ProjectIPBlocks = map[string]string{
 		"185.161.180.0/22": "OurExternalNetwork",
@@ -357,7 +355,7 @@ func initNetworks() {
 
 	for netCidr, prjName := range ProjectIPBlocks {
 
-		NetTree.Add(netCidr, prjName)
+		NetTree.AddByString(netCidr, prjName)
 	}
 
 }
