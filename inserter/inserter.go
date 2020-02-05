@@ -43,7 +43,7 @@ var (
 	ProjectIPBlocks map[string]string = make(map[string]string)
 	ProjectIPS      map[string]string = make(map[string]string)
 
-	NetTree *NetRadixTree
+	NetTree *netradix.NetRadixTree
 
 	Inserts = prometheus.NewCounter(
 		prometheus.CounterOpts{
