@@ -170,7 +170,7 @@ func closeAll(db *sql.DB, consumer *cluster.Consumer) {
 }
 
 func getPrj(ip string) (project string) {
-	found, proj, err := NetTree.SearchBest(ip)
+	found, proj, _ := NetTree.SearchBest(ip)
 
 	if found {
 		return proj
