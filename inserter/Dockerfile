@@ -3,7 +3,7 @@ ARG src_dir="/go/src/github.com/cloudflare/flow-pipeline/inserter"
 FROM golang:alpine as builder
 ARG src_dir
 
-RUN apk --update --no-cache add git gcc && \
+RUN apk --update --no-cache add git gcc musl-dev && \
     mkdir -p ${src_dir}
 
 WORKDIR ${src_dir}
