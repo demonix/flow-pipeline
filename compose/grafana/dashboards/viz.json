@@ -25,12 +25,14 @@
       "dashes": false,
       "datasource": "PostgreSQL",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
         "w": 24,
         "x": 0,
         "y": 0
       },
+      "hiddenSeries": false,
       "id": 2,
       "legend": {
         "avg": false,
@@ -45,6 +47,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -59,7 +64,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  (cast(extract(epoch from time_flow) as integer)/30)*30 AS \"time\",\n  sum(bytes*sampling_rate*8)/30\nFROM flows\nWHERE\n  $__timeFilter(date_inserted)\nGROUP BY \"time\"\nORDER BY \"time\"",
+          "rawSql": "SELECT\n  (cast(extract(epoch from date_inserted) as integer)/30)*30 AS \"time\",\n  sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) *8)/30 as \"traffic\"\nFROM flows\nWHERE\n  $__timeFilter(date_inserted)\nGROUP BY \"time\"\nORDER BY \"time\"",
           "refId": "A",
           "select": [
             [
@@ -136,6 +141,7 @@
       },
       "id": 7,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -203,7 +209,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT src_ip, count(*), sum(bytes) AS sumBytes FROM flows GROUP BY src_ip",
+          "rawSql": "SELECT src_ip, count(*), \nsum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes\nFROM flows\nWHERE\n  $__timeFilter(date_inserted)\n  GROUP BY src_ip\n",
           "refId": "A",
           "select": [
             [
@@ -241,6 +247,7 @@
       },
       "id": 5,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -308,7 +315,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT src_port, count(*), sum(bytes) AS sumBytes FROM flows GROUP BY src_port",
+          "rawSql": "SELECT src_prj, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows \nWHERE\n  $__timeFilter(date_inserted)\nGROUP BY src_prj",
           "refId": "A",
           "select": [
             [
@@ -330,7 +337,7 @@
           ]
         }
       ],
-      "title": "Top source ports",
+      "title": "Top source proj",
       "transform": "table",
       "type": "table"
     },
@@ -346,6 +353,7 @@
       },
       "id": 8,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -413,7 +421,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT dst_ip, count(*), sum(bytes) AS sumBytes FROM flows GROUP BY dst_ip",
+          "rawSql": "SELECT dst_ip, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows \n   WHERE $__timeFilter(date_inserted)\n  GROUP BY dst_ip",
           "refId": "A",
           "select": [
             [
@@ -451,6 +459,7 @@
       },
       "id": 6,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -518,7 +527,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT dst_port, count(*), sum(bytes) AS sumBytes FROM flows GROUP BY dst_port",
+          "rawSql": "SELECT dst_prj, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows\nWHERE $__timeFilter(date_inserted)\nGROUP BY dst_prj",
           "refId": "A",
           "select": [
             [
@@ -540,19 +549,19 @@
           ]
         }
       ],
-      "title": "Top destination ports",
+      "title": "Top destination proj",
       "transform": "table",
       "type": "table"
     }
   ],
-  "schemaVersion": 16,
+  "schemaVersion": 21,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -581,7 +590,7 @@
     ]
   },
   "timezone": "",
-  "title": "Traffic",
-  "uid": "HdAEBnPiz",
-  "version": 3
+  "title": "Traffic Copy",
+  "uid": "b99eoT8Zk",
+  "version": 1
 }
