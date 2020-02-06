@@ -69,6 +69,7 @@ var (
 		"proto",
 		"src_as",
 		"dst_as",
+		"sampler_address",
 	}
 )
 
@@ -156,6 +157,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 			fmsg.Proto,
 			fmsg.SrcAS,
 			fmsg.DstAS,
+			fmsg.SamplerAddress,
 		}
 		s.flows = append(s.flows, extract)
 	}

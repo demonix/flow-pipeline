@@ -22,5 +22,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         proto integer,
         src_port integer,
         dst_port integer
+		sampler_address inet
     );
+	create index ix_date_inserted on flows ( date_inserted);
 EOSQL
