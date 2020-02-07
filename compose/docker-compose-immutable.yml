@@ -27,21 +27,6 @@ services:
       -c "sleep 15 ;
       kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 2 --topic flows ;
       kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 2 --topic flows-processed;"
-  goflow:
-    #image: 'cloudflare/goflow:latest'
-    build: /root/go/src/github.com/demonix/goflow
-    depends_on:
-      - 'initializer'
-    ports:
-      - '8080:8080'
-      - '6343:6343/udp'
-      - '29996:2055/udp'
-    restart: always
-    entrypoint: '/bin/sh'
-    command: >
-      -c "sleep 15 ;
-      /goflow -kafka.brokers kafka:9092
-      -kafka.topic flows"
   grafana:
     image: 'grafana/grafana:latest'
     ports:
@@ -67,17 +52,3 @@ services:
     restart: always
     volumes:
       - ./postgres:/docker-entrypoint-initdb.d
-  processor:
-    build: ../processor
-    restart: always
-    command: >
-      -kafka.input.brokers kafka:9092 -kafka.input.topic flows -flush.count 5000
-      -kafka.output.brokers kafka:9092 -kafka.output.topic flows-processed
-
-
-  inserter:
-    build: ../inserter
-    restart: always
-    command: >
-      -kafka.brokers kafka:9092 -kafka.topic flows-processed -flush.count 5000
-      -postgres.host postgres -postgres.port 5432 -postgres.pass flows

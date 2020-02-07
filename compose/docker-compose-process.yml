@@ -1,0 +1,14 @@
+version: '3'
+services:
+  processor:
+    build: ../processor
+    restart: always
+    command: >
+      -kafka.input.brokers kafka:9092 -kafka.input.topic flows -flush.count 5000
+      -kafka.output.brokers kafka:9092 -kafka.output.topic flows-processed
+  inserter:
+    build: ../inserter
+    restart: always
+    command: >
+      -kafka.brokers kafka:9092 -kafka.topic flows-processed -flush.count 5000
+      -postgres.host postgres -postgres.port 5432 -postgres.pass flows
