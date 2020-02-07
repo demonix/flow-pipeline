@@ -129,13 +129,20 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 
 		srcip := net.IP(fmsg.SrcAddr)
 		dstip := net.IP(fmsg.DstAddr)
+		sampleraddress := net.IP(fmsg.SamplerAddress)
+
 		srcipstr := srcip.String()
 		dstipstr := dstip.String()
+		sampleraddressstr := sampleraddress.string()
+
 		if srcipstr == "<nil>" {
 			srcipstr = "0.0.0.0"
 		}
 		if dstipstr == "<nil>" {
 			dstipstr = "0.0.0.0"
+		}
+		if sampleraddressstr == "<nil>" {
+			sampleraddressstr = "0.0.0.0"
 		}
 		srcprj := getPrj(srcipstr)
 		dstprj := getPrj(dstipstr)
@@ -157,7 +164,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 			fmsg.Proto,
 			fmsg.SrcAS,
 			fmsg.DstAS,
-			fmsg.SamplerAddress,
+			sampleraddressstr,
 		}
 		s.flows = append(s.flows, extract)
 	}
