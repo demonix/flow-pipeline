@@ -3,8 +3,6 @@ services:
   goflow:
     #image: 'cloudflare/goflow:latest'
     build: /root/go/src/github.com/demonix/goflow
-    depends_on:
-      - 'initializer'
     ports:
       - '8080:8080'
       - '6343:6343/udp'
