@@ -133,7 +133,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 
 		srcipstr := srcip.String()
 		dstipstr := dstip.String()
-		sampleraddressstr := sampleraddress.string()
+		sampleraddressstr := sampleraddress.String()
 
 		if srcipstr == "<nil>" {
 			srcipstr = "0.0.0.0"
