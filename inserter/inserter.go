@@ -207,11 +207,15 @@ func initNetworks() {
 	fileHandle, _ := os.Open("/etc/nets.txt")
 	defer fileHandle.Close()
 	fileScanner := bufio.NewScanner(fileHandle)
+	cnt := 0
 
 	for fileScanner.Scan() {
 		line := strings.Split(fileScanner.Text(), "|")
 		NetTree.AddByString(line[0], line[1])
+		log.Info("Loaded net %s: %s", line[0], line[1])
+		cnt++
 	}
+	log.Info("Loaded %s records", cnt)
 
 }
 
