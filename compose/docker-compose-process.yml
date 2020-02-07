@@ -9,6 +9,8 @@ services:
   inserter:
     build: ../inserter
     restart: always
+    volumes:
+      - ./nets.txt:/etc/nets.txt
     command: >
       -kafka.brokers kafka:9092 -kafka.topic flows-processed -flush.count 5000
       -postgres.host postgres -postgres.port 5432 -postgres.pass flows
