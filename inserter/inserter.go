@@ -169,7 +169,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 	} else {
 		log.Debug(fmsg)
 		ts := time.Unix(int64(fmsg.TimeFlowEnd), 0)
-		timeNow := time.Now
+		timeNow := time.Now()
 
 		srcip := net.IP(fmsg.SrcAddr)
 		dstip := net.IP(fmsg.DstAddr)
