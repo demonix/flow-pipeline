@@ -96,6 +96,49 @@ func (s *state) flush() bool {
 	log.Infof("Processed %d records in the last iteration.", s.msgCount)
 	s.msgCount = 0
 
+	txn, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := txn.Prepare(pq.CopyIn("flows", flow_fields...))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, curFlow := range s.flows {
+		_, err = stmt.Exec(curFlow...)
+		if err != nil {
+			log.Debugf("TEST %v", curFlow)
+			log.Fatal(err)
+		}
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = stmt.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = txn.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s.consumer.MarkOffsets(s.offstash)
+	s.offstash = cluster.NewOffsetStash()
+	s.flows = make([][]interface{}, 0)
+	return true
+}
+
+func (s *state) flushOld() bool {
+	log.Infof("Processed %d records in the last iteration.", s.msgCount)
+	s.msgCount = 0
+
 	flows_replace := make([]string, len(flow_fields))
 	for i := range flow_fields {
 		flows_replace[i] = fmt.Sprintf("$%v", i+1)
@@ -126,7 +169,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 	} else {
 		log.Debug(fmsg)
 		ts := time.Unix(int64(fmsg.TimeFlowEnd), 0)
-		//ts := time.Now.Truncate(time.Minute)
+		timeNow := time.Now
 
 		srcip := net.IP(fmsg.SrcAddr)
 		dstip := net.IP(fmsg.DstAddr)
@@ -149,7 +192,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 		dstprj := getPrj(dstipstr)
 
 		extract := []interface{}{
-			"NOW()",
+			timeNow,
 			ts,
 			fmsg.Type,
 			fmsg.SamplingRate,
