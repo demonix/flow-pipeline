@@ -16,7 +16,7 @@ import (
 	cluster "github.com/bsm/sarama-cluster"
 	flow "github.com/demonix/goflow/pb"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
@@ -96,7 +96,7 @@ func (s *state) flush() bool {
 	log.Infof("Processed %d records in the last iteration with bulk.", s.msgCount)
 	s.msgCount = 0
 
-	txn, err := db.Begin()
+	txn, err := s.db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
