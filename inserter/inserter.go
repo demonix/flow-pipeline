@@ -93,7 +93,7 @@ type state struct {
 }
 
 func (s *state) flush() bool {
-	log.Infof("Processed %d records in the last iteration.", s.msgCount)
+	log.Infof("Processed %d records in the last iteration with bulk.", s.msgCount)
 	s.msgCount = 0
 
 	txn, err := db.Begin()
