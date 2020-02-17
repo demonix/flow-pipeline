@@ -7,6 +7,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         date_inserted timestamp default NULL,
 
         time_flow timestamp default NULL,
+		flow_direction integer,
         type integer,
         sampling_rate integer,
         src_as bigint,

@@ -56,6 +56,7 @@ var (
 	flow_fields = []string{
 		"date_inserted",
 		"time_flow",
+		"flow_direction",
 		"type",
 		"sampling_rate",
 		"src_ip",
@@ -194,6 +195,7 @@ func (s *state) buffer(msg *sarama.ConsumerMessage, cur time.Time) (bool, error,
 		extract := []interface{}{
 			timeNow,
 			ts,
+			fmsg.FlowDirection,
 			fmsg.Type,
 			fmsg.SamplingRate,
 			srcipstr,
