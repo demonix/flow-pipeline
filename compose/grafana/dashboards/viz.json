@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1581864847355,
+  "iteration": 1581864847357,
   "links": [],
   "panels": [
     {
@@ -65,7 +65,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  (cast(extract(epoch from date_inserted) as integer)/30)*30 AS \"time\",\n  sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) *8)/30 as \"traffic\"\nFROM flows\nWHERE\n  (src_prj in ($SrcProject) or '' = $SrcProject) and\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n  $__timeFilter(date_inserted)\nGROUP BY \"time\"\nORDER BY \"time\"",
+          "rawSql": "SELECT\n  (cast(extract(epoch from date_inserted) as integer)/30)*30 AS \"time\",\n  sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) *8)/30 as \"traffic\"\nFROM flows\nWHERE\n  sampler_address in ($SamplerAddress) and\n  (src_prj in ($SrcProject) or '' = $SrcProject) and\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n  $__timeFilter(date_inserted)\nGROUP BY \"time\"\nORDER BY \"time\"",
           "refId": "A",
           "select": [
             [
@@ -210,7 +210,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT src_ip, count(*), \nsum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes\n\nFROM flows\nWHERE\n    (src_prj in ($SrcProject) or '' = $SrcProject) and\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n\n  $__timeFilter(date_inserted)\n  GROUP BY src_ip\n",
+          "rawSql": "SELECT src_ip, count(*), \nsum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes\n\nFROM flows\nWHERE\nsampler_address in ($SamplerAddress) and\n  (src_prj in ($SrcProject) or '' = $SrcProject) and\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n\n  $__timeFilter(date_inserted)\n  GROUP BY src_ip\n",
           "refId": "A",
           "select": [
             [
@@ -316,7 +316,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT src_prj, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows \nWHERE\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n\n  $__timeFilter(date_inserted)\nGROUP BY src_prj",
+          "rawSql": "SELECT src_prj, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows \nWHERE\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n  sampler_address in ($SamplerAddress) and\n  $__timeFilter(date_inserted)\nGROUP BY src_prj",
           "refId": "A",
           "select": [
             [
@@ -422,7 +422,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT dst_ip, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows \n   WHERE\n         (src_prj in ($SrcProject) or '' = $SrcProject) and\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n\n\n     $__timeFilter(date_inserted)\n \n  GROUP BY dst_ip",
+          "rawSql": "SELECT dst_ip, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows \n   WHERE\n   sampler_address in ($SamplerAddress) and\n         (src_prj in ($SrcProject) or '' = $SrcProject) and\n  (dst_prj in ($DstProject) or '' = $DstProject) and\n\n\n     $__timeFilter(date_inserted)\n \n  GROUP BY dst_ip",
           "refId": "A",
           "select": [
             [
@@ -528,7 +528,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT dst_prj, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows\nWHERE\n  (src_prj in ($SrcProject) or '' = $SrcProject) and\n\n$__timeFilter(date_inserted)\n\nGROUP BY dst_prj",
+          "rawSql": "SELECT dst_prj, count(*), sum(bytes*(case when sampling_rate = 0 then 1 else sampling_rate end) ) as sumBytes FROM flows\nWHERE\nsampler_address in ($SamplerAddress) and\n  (src_prj in ($SrcProject) or '' = $SrcProject) and\n\n$__timeFilter(date_inserted)\n\nGROUP BY dst_prj",
           "refId": "A",
           "select": [
             [
@@ -560,6 +560,35 @@
   "tags": [],
   "templating": {
     "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "tags": [],
+          "text": "172.16.0.235",
+          "value": [
+            "172.16.0.235"
+          ]
+        },
+        "datasource": "PostgreSQL",
+        "definition": "SELECT distinct(sampler_address) from flows\nWHERE\n  $__timeFilter(date_inserted)\n",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": true,
+        "name": "SamplerAddress",
+        "options": [],
+        "query": "SELECT distinct(sampler_address) from flows\nWHERE\n  $__timeFilter(date_inserted)\n",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
       {
         "allValue": "''",
         "current": {
@@ -650,5 +679,5 @@
   "timezone": "",
   "title": "Traffic",
   "uid": "3T7MgdQWz",
-  "version": 1
+  "version": 2
 }
